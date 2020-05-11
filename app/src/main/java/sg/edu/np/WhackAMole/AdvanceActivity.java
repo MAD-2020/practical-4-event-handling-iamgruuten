@@ -20,18 +20,36 @@ public class Main2Activity extends AppCompatActivity {
         - Feel free to modify the function to suit your program.
     */
 
-
+    String TAG = "Advance";
+    private CountDownTimer mCountDownTimer;
+    int advancedScore = 0;
+    TextView viewScore;
+    String seconds;
+    long timeleft;
+    Button buttonleft, buttonright, buttonmiddle;
+    Button buttonleft2, buttonmiddle2, buttonright2;
+    Button buttonleft3, buttonmiddle3, buttonright3;
+    Toast toast;
 
     private void readyTimer(){
-        /*  HINT:
-            The "Get Ready" Timer.
-            Log.v(TAG, "Ready CountDown!" + millisUntilFinished/ 1000);
-            Toast message -"Get Ready In X seconds"
-            Log.v(TAG, "Ready CountDown Complete!");
-            Toast message - "GO!"
-            belongs here.
-            This timer countdown from 10 seconds to 0 seconds and stops after "GO!" is shown.
-         */
+       timeleft = 10;
+
+        mCountDownTimer = new CountDownTimer(timeleft, 1) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                toast.cancel();
+                Log.v(TAG,"OnTick: " + timeleft);
+                seconds = String.valueOf(timeleft);
+                toast.makeText(Main2Activity.this, "Get Ready in " + seconds + " Seconds", Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onFinish() {
+                Log.v(TAG,"Completed");
+                Toast.makeText(Main2Activity.this, "Go", Toast.LENGTH_LONG).show();
+
+            }
+        }.start();
     }
     private void placeMoleTimer(){
         /* HINT:
@@ -42,32 +60,21 @@ public class Main2Activity extends AppCompatActivity {
            This is an infinite countdown timer.
          */
     }
-    private static final int[] BUTTON_IDS = {
-        /* HINT:
-            Stores the 9 buttons IDs here for those who wishes to use array to create all 9 buttons.
-            You may use if you wish to change or remove to suit your codes.*/
+    private static final Button[] BUTTON_IDS = {
     };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        /*Hint:
-            This starts the countdown timers one at a time and prepares the user.
-            This also prepares the existing score brought over.
-            It also prepares the button listeners to each button.
-            You may wish to use the for loop to populate all 9 buttons with listeners.
-         */
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main2);
+        Intent intent = getIntent();
+        advancedScore = Integer.parseInt(intent.getStringExtra("Score"));
+        Log.v(TAG, "Current User Score: " + advancedScore);
+        viewScore = findViewById(R.id.score);
+        viewScore.setText(String.valueOf(advancedScore));
 
-        Log.v(TAG, "Current User Score: " + String.valueOf(advancedScore));
+        readyTimer();
 
-
-        for(final int id : BUTTON_IDS){
-            /*  HINT:
-            This creates a for loop to populate all 9 buttons with listeners.
-            You may use if you wish to remove or change to suit your codes.
-            */
-        }
     }
     @Override
     protected void onStart(){
