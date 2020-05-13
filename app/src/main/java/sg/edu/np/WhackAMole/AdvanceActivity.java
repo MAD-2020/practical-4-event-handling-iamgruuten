@@ -10,9 +10,11 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
-public class Main2Activity extends AppCompatActivity {
+public class AdvanceActivity extends AppCompatActivity {
     /* Hint
         - The function setNewMole() uses the Random class to generate a random value ranged from 0 to 8.
         - The function doCheck() takes in button selected and computes a hit or miss and adjust the score accordingly.
@@ -26,42 +28,50 @@ public class Main2Activity extends AppCompatActivity {
     TextView viewScore;
     String seconds;
     long timeleft;
-    Button buttonleft, buttonright, buttonmiddle;
-    Button buttonleft2, buttonmiddle2, buttonright2;
-    Button buttonleft3, buttonmiddle3, buttonright3;
-    Toast toast;
+    Toast toast = null;
+    String textButton;
+
 
     private void readyTimer(){
-       timeleft = 10;
-
-        mCountDownTimer = new CountDownTimer(timeleft, 1) {
+       timeleft = 10 * 1000;
+       mCountDownTimer = new CountDownTimer(timeleft, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
-                toast.cancel();
-                Log.v(TAG,"OnTick: " + timeleft);
-                seconds = String.valueOf(timeleft);
-                toast.makeText(Main2Activity.this, "Get Ready in " + seconds + " Seconds", Toast.LENGTH_LONG).show();
+                if(toast != null) toast.cancel();
+                Log.v(TAG,"OnTick: " + millisUntilFinished);
+                if(toast != null) toast.cancel();
+                seconds = String.valueOf(millisUntilFinished / 1000);
+                toast = Toast.makeText(AdvanceActivity.this, "Get Ready in " + seconds + " Seconds", Toast.LENGTH_SHORT);
+                toast.show();
             }
 
             @Override
             public void onFinish() {
+                toast.cancel();
+                placeMoleTimer();
                 Log.v(TAG,"Completed");
-                Toast.makeText(Main2Activity.this, "Go", Toast.LENGTH_LONG).show();
+                Toast.makeText(AdvanceActivity.this, "Go", Toast.LENGTH_SHORT).show();
 
             }
         }.start();
     }
     private void placeMoleTimer(){
-        /* HINT:
-           Creates new mole location each second.
-           Log.v(TAG, "New Mole Location!");
-           setNewMole();
-           belongs here.
-           This is an infinite countdown timer.
-         */
+        mCountDownTimer = new CountDownTimer(10000, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                setNewMole();
+            }
+
+            @Override
+            public void onFinish() {
+                mCountDownTimer.start();
+            }
+        }.start();
     }
-    private static final Button[] BUTTON_IDS = {
-    };
+
+
+    private static final int[] BUTTON_IDS = {1,2,3,4,5,6,7,8,9};
+    private ArrayList<Button> buttonList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,32 +82,58 @@ public class Main2Activity extends AppCompatActivity {
         Log.v(TAG, "Current User Score: " + advancedScore);
         viewScore = findViewById(R.id.score);
         viewScore.setText(String.valueOf(advancedScore));
-
         readyTimer();
 
+        for (int i = 1; i <= BUTTON_IDS.length; i++) {
+            final Button button = findViewById(getResources().getIdentifier("button" + i, "id", this.getPackageName()));
+            buttonList.add(button);
+        }
+
+        for(int i = 0; i < buttonList.size(); i++){
+            final Button button = buttonList.get(i);
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Button b = (Button)v;
+                    String buttonText = b.getText().toString();
+                    doCheck(buttonText);
+                }
+            });
+        }
     }
+
     @Override
     protected void onStart(){
         super.onStart();
+        //Set all to "O"
+        for (int i = 1; i <= BUTTON_IDS.length; i++) {
+            Button button = (Button) findViewById(getResources().getIdentifier("button" + i, "id", this.getPackageName()));
+            button.setText("O");
+        }
     }
-    private void doCheck(Button checkButton)
+
+    private void doCheck(String checkButton)
     {
-        /* Hint:
-            Checks for hit or miss
-            Log.v(TAG, "Hit, score added!");
-            Log.v(TAG, "Missed, point deducted!");
-            belongs here.
-        */
+        if(checkButton == "*") {Log.v(TAG, "Hit, Score added!"); advancedScore = advancedScore + 1;}
+        else{ Log.v(TAG, "Missed, Score deducted"); advancedScore = advancedScore - 1;}
+        viewScore.setText(Integer.toString(advancedScore));
+        setNewMole();
     }
 
     public void setNewMole()
     {
-        /* Hint:
-            Clears the previous mole location and gets a new random location of the next mole location.
-            Sets the new location of the mole.
-         */
+        //Set all to "O"
+        for (int i = 1; i <= BUTTON_IDS.length; i++) {
+            Button button = (Button) findViewById(getResources().getIdentifier("button" + i, "id", this.getPackageName()));
+            button.setText("O");
+        }
+
         Random ran = new Random();
-        int randomLocation = ran.nextInt(9);
+        int randomLocation = ran.nextInt(8)+1;
+        Log.v(TAG,"Its located at: " + randomLocation);
+
+        Button button = (Button) findViewById(getResources().getIdentifier("button" + randomLocation, "id", this.getPackageName()));
+        button.setText("*");
     }
 }
 

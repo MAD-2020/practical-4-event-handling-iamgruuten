@@ -14,50 +14,133 @@ import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
-    /* Hint
-        - The function setNewMole() uses the Random class to generate a random value ranged from 0 to 2.
-        - The function doCheck() takes in button selected and computes a hit or miss and adjust the score accordingly.
-        - The function doCheck() also decides if the user qualifies for the advance level and triggers for a dialog box to ask for user to decide.
-        - The function nextLevelQuery() builds the dialog box and shows. It also triggers the nextLevel() if user selects Yes or return to normal state if user select No.
-        - The function nextLevel() launches the new advanced page.
-        - Feel free to modify the function to suit your program.
-    */
+    private Button ButtonLeft;
+    private Button ButtonRight;
+    private Button ButtonMiddle;
+    private TextView TextScore;
+
+    private String Score = "0";
+    private int intRandom;
+    private static final String TAG = "ButtonActivity";
+    Random random = new Random();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Log.v(TAG,"Whack-A-Mole" );
+        ButtonLeft = findViewById(R.id.button1); //Set as 1
+        ButtonMiddle = findViewById(R.id.ButtonMiddle); //Set as 2
+        ButtonRight = findViewById(R.id.ButtonRight); //Set as 3
+        TextScore = findViewById(R.id.TextViewScore); //Score view
+        reset();
 
-        Log.v(TAG, "Finished Pre-Initialisation!");
+        ButtonLeft.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.v(TAG,"Button Left clicked!" );
+                Score = check(1, intRandom, Score);
+                TextScore.setText(Score);
+                reset();
+            }
+        });
 
+        ButtonMiddle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.v(TAG,"Button Middle clicked!" );
+                Score = check(2, intRandom, Score);
+                TextScore.setText(Score);
+                reset();
+            }
+        });
 
+        ButtonRight.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.v(TAG,"Button Right clicked!" );
+                Score = check(3, intRandom, Score);
+                TextScore.setText(Score);
+                reset();
+            }
+        });
     }
+
     @Override
-    protected void onStart(){
+    protected void onStart() {
         super.onStart();
-        setNewMole();
-        Log.v(TAG, "Starting GUI!");
+        Log.v(TAG,"Started");
     }
+
     @Override
-    protected void onPause(){
+    protected void onPause() {
         super.onPause();
-        Log.v(TAG, "Paused Whack-A-Mole!");
+        Log.v(TAG,"Paused");
     }
 
-    @Override
-    protected void onStop(){
-        super.onStop();
-        Log.v(TAG, "Stopped Whack-A-Mole!");
-        finish();
+    private void reset(){
+        //Initialize
+        intRandom = random(); //Get Random
+        if(intRandom == 1){ButtonLeft.setText("*"); ButtonMiddle.setText("O"); ButtonRight.setText("O");}
+        else if(intRandom == 2){ButtonMiddle.setText("*"); ButtonLeft.setText("O"); ButtonRight.setText("O");}
+        else if(intRandom == 3){ButtonRight.setText("*"); ButtonMiddle.setText("O"); ButtonLeft.setText("O");}
     }
 
-    private void doCheck(Button checkButton) {
-        /* Checks for hit or miss and if user qualify for advanced page.
-            Triggers nextLevelQuery().
-         */
+    private int random(){
+        return random.nextInt(3) + 1;
     }
+
+    private String check(int ButtonClicked, int value, String score){
+        int Score =  Integer.parseInt(score);
+        if(ButtonClicked == value){
+            Log.v(TAG, "Hit, Score added!");
+            Score = Score + 1;
+        }else{
+            Log.v(TAG, "Missed, Score deducted!");
+            Score = Score - 1;
+        }
+
+        //Check qualify for advance stage
+
+        if(Score == 10){
+            nextLevelQuery();
+        }
+
+        return String.valueOf(Score);
+    }
+
 
     private void nextLevelQuery(){
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        builder.setTitle("Warning! Insane Whack-A-Mole Incoming!");
+        builder.setMessage("Would you like to advance to advanced mode?");
+
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // Do nothing but close the dialog
+                Log.v(TAG,"User accepted");
+                nextLevel();
+                dialog.dismiss();
+            }
+        });
+
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // Do nothing
+                Log.v(TAG,"User decline");
+                dialog.dismiss();
+            }
+        });
+
+        AlertDialog alert = builder.create();
+        alert.show();
+
         /*
         Builds dialog box here.
         Log.v(TAG, "User accepts!");
@@ -67,11 +150,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void nextLevel(){
-        /* Launch advanced page */
-    }
-
-    private void setNewMole() {
-        Random ran = new Random();
-        int randomLocation = ran.nextInt(3);
+        Intent intent = new Intent(MainActivity.this, AdvanceActivity.class);
+        intent.putExtra("Score", Score);
+        startActivity(intent);
     }
 }
